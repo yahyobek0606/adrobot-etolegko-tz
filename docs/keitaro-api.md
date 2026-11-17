@@ -128,6 +128,14 @@ Real example of the result (`GET /campaigns/212636/streams`, another user's camp
 - **Push**: `PUT /streams/{stream_id}` with the full desired `offers` list: `[{offer_id, share, state: "active"}]`
 - **Remove an offer**: push the list without it. Never call `/offers/{id}/archive`, which archives the offer itself for every campaign
 
+## Admin UI links
+- Campaign editor: `{KEITARO_BASE_URL}/admin/#!/campaign/{id}/main` (verified)
+
+## Data quirks seen on the instance
+- `offer.country` is usually a list of country names, but can be an empty string `""`
+- `campaign.domain` and `campaign.domain_id` are `null` for campaigns without a domain
+- `GET /campaigns/{id}` for a missing id returns `404` with a plain-text body
+
 ## Implications for our implementation
 - **Offer search**: the API has no search, so the backend caches `GET /offers` briefly and filters by id or name substring itself
 - **Shares** are integers. They should sum to 100 for the stream

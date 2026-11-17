@@ -21,10 +21,191 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/campaigns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Campaigns */
+        get: operations["list_campaigns_api_v1_campaigns_get"];
+        put?: never;
+        /** Create Campaign */
+        post: operations["create_campaign_api_v1_campaigns_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaigns/form-options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Campaign Form Options */
+        get: operations["campaign_form_options_api_v1_campaigns_form_options_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/offers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search Offers */
+        get: operations["search_offers_api_v1_offers_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaigns/{campaign_id}/offers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Campaign Offers */
+        get: operations["get_campaign_offers_api_v1_campaigns__campaign_id__offers_get"];
+        /** Update Campaign Offers */
+        put: operations["update_campaign_offers_api_v1_campaigns__campaign_id__offers_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/campaigns/{campaign_id}/offers/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sync Campaign Offers */
+        post: operations["sync_campaign_offers_api_v1_campaigns__campaign_id__offers_sync_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** CampaignCreateRequest */
+        CampaignCreateRequest: {
+            /** Name */
+            name: string;
+            /** Countries */
+            countries: string[];
+            /** Offer Id */
+            offer_id: number;
+            /** Domain Id */
+            domain_id: number;
+            /** Group Id */
+            group_id: number;
+            /** Traffic Source Id */
+            traffic_source_id: number;
+        };
+        /** CampaignDefaultsResponse */
+        CampaignDefaultsResponse: {
+            /** Domain Id */
+            domain_id: number;
+            /** Group Id */
+            group_id: number;
+            /** Traffic Source Id */
+            traffic_source_id: number;
+        };
+        /** CampaignFormOptionsResponse */
+        CampaignFormOptionsResponse: {
+            /** Domains */
+            domains: components["schemas"]["NamedRefResponse"][];
+            /** Groups */
+            groups: components["schemas"]["NamedRefResponse"][];
+            /** Traffic Sources */
+            traffic_sources: components["schemas"]["NamedRefResponse"][];
+            defaults: components["schemas"]["CampaignDefaultsResponse"];
+            /** Fallback Redirect Url */
+            fallback_redirect_url: string;
+        };
+        /** CampaignOfferInput */
+        CampaignOfferInput: {
+            /** Offer Id */
+            offer_id: number;
+            /** Share */
+            share: number;
+            /** Is Pinned */
+            is_pinned: boolean;
+            /** Is Archived */
+            is_archived: boolean;
+        };
+        /** CampaignOfferResponse */
+        CampaignOfferResponse: {
+            /** Offer Id */
+            offer_id: number;
+            /** Name */
+            name: string;
+            /** Share */
+            share: number;
+            /** Is Pinned */
+            is_pinned: boolean;
+            /** Is Archived */
+            is_archived: boolean;
+        };
+        /** CampaignOffersResponse */
+        CampaignOffersResponse: {
+            campaign: components["schemas"]["CampaignResponse"];
+            stream: components["schemas"]["StreamResponse"] | null;
+            /** Offers */
+            offers: components["schemas"]["CampaignOfferResponse"][];
+        };
+        /** CampaignOffersUpdateRequest */
+        CampaignOffersUpdateRequest: {
+            /** Offers */
+            offers: components["schemas"]["CampaignOfferInput"][];
+        };
+        /** CampaignResponse */
+        CampaignResponse: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Alias */
+            alias: string;
+            /** Is Active */
+            is_active: boolean;
+            /** Tracking Url */
+            tracking_url: string;
+            /** Admin Url */
+            admin_url: string;
+            /** Group Id */
+            group_id: number | null;
+        };
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
+        };
         /** HealthResponse */
         HealthResponse: {
             /**
@@ -37,6 +218,44 @@ export interface components {
              * @constant
              */
             database: "ok";
+        };
+        /** NamedRefResponse */
+        NamedRefResponse: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+        };
+        /** OfferResponse */
+        OfferResponse: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Group */
+            group: string | null;
+            /** Countries */
+            countries: string[];
+        };
+        /** StreamResponse */
+        StreamResponse: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+            /** Input */
+            input?: unknown;
+            /** Context */
+            ctx?: Record<string, never>;
         };
     };
     responses: never;
@@ -63,6 +282,208 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthResponse"];
+                };
+            };
+        };
+    };
+    list_campaigns_api_v1_campaigns_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignResponse"][];
+                };
+            };
+        };
+    };
+    create_campaign_api_v1_campaigns_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CampaignCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    campaign_form_options_api_v1_campaigns_form_options_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignFormOptionsResponse"];
+                };
+            };
+        };
+    };
+    search_offers_api_v1_offers_get: {
+        parameters: {
+            query?: {
+                query?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_campaign_offers_api_v1_campaigns__campaign_id__offers_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                campaign_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignOffersResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_campaign_offers_api_v1_campaigns__campaign_id__offers_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                campaign_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CampaignOffersUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignOffersResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sync_campaign_offers_api_v1_campaigns__campaign_id__offers_sync_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                campaign_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CampaignOffersResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

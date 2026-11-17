@@ -1,0 +1,103 @@
+[
+  {
+    "name": "no offers",
+    "input": [],
+    "expected": { "shares": [], "error": "no_active_offers" }
+  },
+  {
+    "name": "single unpinned offer takes everything",
+    "input": [{ "pinned": false, "share": 0 }],
+    "expected": { "shares": [100], "error": null }
+  },
+  {
+    "name": "even split",
+    "input": [
+      { "pinned": false, "share": 0 },
+      { "pinned": false, "share": 0 },
+      { "pinned": false, "share": 0 },
+      { "pinned": false, "share": 0 }
+    ],
+    "expected": { "shares": [25, 25, 25, 25], "error": null }
+  },
+  {
+    "name": "rounding leftover goes to the top unpinned rows",
+    "input": [
+      { "pinned": false, "share": 0 },
+      { "pinned": false, "share": 0 },
+      { "pinned": false, "share": 0 }
+    ],
+    "expected": { "shares": [34, 33, 33], "error": null }
+  },
+  {
+    "name": "unpinned share values are ignored",
+    "input": [
+      { "pinned": false, "share": 90 },
+      { "pinned": false, "share": 10 }
+    ],
+    "expected": { "shares": [50, 50], "error": null }
+  },
+  {
+    "name": "pinned offers keep their share when an offer is added",
+    "input": [
+      { "pinned": true, "share": 25 },
+      { "pinned": true, "share": 25 },
+      { "pinned": false, "share": 25 },
+      { "pinned": false, "share": 25 },
+      { "pinned": false, "share": 0 }
+    ],
+    "expected": { "shares": [25, 25, 17, 17, 16], "error": null }
+  },
+  {
+    "name": "pinned offers keep their share when an offer is removed",
+    "input": [
+      { "pinned": true, "share": 25 },
+      { "pinned": true, "share": 25 },
+      { "pinned": false, "share": 25 }
+    ],
+    "expected": { "shares": [25, 25, 50], "error": null }
+  },
+  {
+    "name": "leftover skips pinned rows",
+    "input": [
+      { "pinned": false, "share": 0 },
+      { "pinned": true, "share": 10 },
+      { "pinned": false, "share": 0 },
+      { "pinned": false, "share": 0 },
+      { "pinned": false, "share": 0 }
+    ],
+    "expected": { "shares": [23, 10, 23, 22, 22], "error": null }
+  },
+  {
+    "name": "pinned exactly 100 leaves zero for unpinned",
+    "input": [
+      { "pinned": true, "share": 100 },
+      { "pinned": false, "share": 0 }
+    ],
+    "expected": { "shares": [100, 0], "error": null }
+  },
+  {
+    "name": "pinned over 100",
+    "input": [
+      { "pinned": true, "share": 70 },
+      { "pinned": true, "share": 40 },
+      { "pinned": false, "share": 0 }
+    ],
+    "expected": { "shares": [70, 40, 0], "error": "pinned_exceeds_total" }
+  },
+  {
+    "name": "all pinned summing to 100",
+    "input": [
+      { "pinned": true, "share": 60 },
+      { "pinned": true, "share": 40 }
+    ],
+    "expected": { "shares": [60, 40], "error": null }
+  },
+  {
+    "name": "all pinned not summing to 100",
+    "input": [
+      { "pinned": true, "share": 60 },
+      { "pinned": true, "share": 30 }
+    ],
+    "expected": { "shares": [60, 30], "error": "pinned_total_mismatch" }
+  }
+]

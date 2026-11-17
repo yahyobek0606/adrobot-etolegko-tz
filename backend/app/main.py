@@ -10,6 +10,7 @@ from app.core.logging import configure_logging
 from app.core.middleware import RequestContextMiddleware
 from app.core.settings import Settings, get_settings
 from app.db.session import Database
+from app.providers.keitaro.factory import create_keitaro_http_client, create_keitaro_provider
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -18,9 +19,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-        app.state.database = Database(settings.database_url)
-        yield
-        await app.state.database.dispose()
+        database = Database(settings.database_url)
+        async with create_keitaro_http_client(settings) as keitaro_http:
+            app.state.database = database
+            app.state.provider = create_keitaro_provider(settings, keitaro_http)
+            yield
+        await database.dispose()
 
     app = FastAPI(title=settings.app_name, lifespan=lifespan)
     app.add_middleware(RequestContextMiddleware)

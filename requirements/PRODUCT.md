@@ -57,4 +57,6 @@ Decisions made where the spec was ambiguous. Change them here if they are wrong.
     - Offers present in the provider but missing locally are added
     - Shares are taken from the provider
 12. **View in KT** — opens the campaign page in the Keitaro admin in a new tab.
-13. **Auth** — none. This is a single-user internal tool.
+13. **Importing shares from the provider** — on first open and on fetch, shares are taken from Keitaro as they are. If they are not what the automatic split would produce (e.g. 33/67), those offers are imported as pinned, so the editor always shows Keitaro's real numbers. Unpin to rebalance.
+14. **Push** — re-validated on the server, then the offers flow is updated in Keitaro, then the local state is saved. If Keitaro fails, nothing changes locally.
+15. **Auth** — none. This is a single-user internal tool.

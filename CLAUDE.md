@@ -15,6 +15,10 @@ Original assignment: `requirements/tz.md`. Product spec: `requirements/PRODUCT.m
 - Keitaro is one implementation of a generic tracker provider; business logic must never import Keitaro code directly
 - No new dependency without a reason; prefer what is listed below
 
+## Workflow
+- Work directly on `main`. Do not create branches or commits; the user handles git
+- Do not suggest or mention committing
+
 ## Infrastructure
 - Docker + docker compose, `compose.yaml` at repo root
 - Services:
@@ -131,11 +135,20 @@ frontend/src/
 - **Server state** lives only in TanStack Query: query key factories per feature, mutations invalidate affected keys
 - **Editor draft state** is a `useReducer` inside `campaign-editor/model`, not global state. Actions: `add`, `archive`, `restore`, `togglePin`, `setShare`, `reset`. "Dirty" is derived by comparing the draft with server data
 - **Share calculation** is a pure function, mirrored on the backend. The backend is authoritative and re-validates on push. Both sides are tested against the same fixture cases in `shared/share-cases.json`
-- **Offer live search**: shadcn `Command` inside `Popover`, a `useDebouncedValue` hook (300ms), a query with `placeholderData: keepPreviousData`, and `enabled` only when the term has at least 2 characters
+- **Offer live search**: `features/offers/components/OfferCombobox` (shadcn `Command` in `Popover`), `useDebouncedValue` (300ms), `placeholderData: keepPreviousData`; queries only while the popover is open, an empty term lists the first offers. Reuse it, don't rebuild it
+- **Countries**: ISO 3166-1 alpha-2 only. Frontend list in `lib/country-codes.ts`, backend uses `pycountry`
+- **Theme**: tokens in `src/index.css` (`:root`); route colours `route-geo` (amber, Google flow) and `route-offer` (teal, offers flow) mean those flows everywhere. Font: Onest
+- **Tests**: page tests render real routes via `renderRoute` with MSW handlers from `test/handlers.ts`; override per test with `server.use`
 - **Forms**: react-hook-form + zod schema, shadcn `Field` components
 - **Feedback**: `sonner` toasts for mutation results; `AlertDialog` to confirm discarding unpushed changes
 - **Routes** are declared in `app/routes.tsx`; URLs are built only through `app/paths.ts`
+- **Keyboard shortcuts** are declared in `app/shortcuts.ts` and bound with `useHotkey` (skips inputs and open dialogs unless it's a mod shortcut). Show the key with shadcn `Kbd` next to the control it triggers
 - No `any`, no default exports (enforced by oxlint), components in PascalCase files
+
+## Shared
+- `shared/` holds fixtures used by both apps, mounted at `/shared` in both containers
+- `shared/share-cases.json` is the contract for share allocation: backend `app/domain/shares.py` and frontend `features/campaign-editor/model/shares.ts` must both pass it. Change the cases first, then both implementations
+- Frontend imports it via the `@shared` alias
 
 ## Commands
 - `docker compose up --build`: run the whole stack

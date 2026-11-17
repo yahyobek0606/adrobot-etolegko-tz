@@ -24,6 +24,7 @@ services:
       LOG_JSON: "false"
     volumes:
       - ./backend:/app
+      - ./shared:/shared:ro
     ports:
       - "8000:8000"
     depends_on:
@@ -38,6 +39,7 @@ services:
       VITE_API_PROXY_TARGET: http://backend:8000
     volumes:
       - ./frontend:/app
+      - ./shared:/shared:ro
       - frontend-node-modules:/app/node_modules
     ports:
       - "5173:5173"

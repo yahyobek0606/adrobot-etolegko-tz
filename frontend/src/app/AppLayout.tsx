@@ -1,8 +1,17 @@
-import { Link, Outlet } from 'react-router'
+import { Link, Outlet, useLocation, useNavigate } from 'react-router'
 
 import { paths } from '@/app/paths'
+import { shortcuts } from '@/app/shortcuts'
+import { useHotkey } from '@/hooks/useHotkey'
 
 export function AppLayout() {
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
+
+  useHotkey(shortcuts.newCampaign, () => void navigate(paths.campaignCreate), {
+    enabled: pathname !== paths.campaignCreate,
+  })
+
   return (
     <div className="min-h-svh bg-background text-foreground">
       <header className="border-b">

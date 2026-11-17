@@ -2,7 +2,8 @@ FROM node:22-alpine AS base
 
 ENV PNPM_HOME=/pnpm \
     PATH=/pnpm:$PATH \
-    COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+    COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
+    npm_config_store_dir=/pnpm/store
 RUN corepack enable
 WORKDIR /app
 

@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     keitaro_default_group_id: int
     keitaro_default_traffic_source_id: int
     keitaro_timeout_seconds: float = 10.0
+    keitaro_offers_ttl_seconds: float = 60.0
 
     fallback_redirect_url: HttpUrl = HttpUrl("https://google.com")
 

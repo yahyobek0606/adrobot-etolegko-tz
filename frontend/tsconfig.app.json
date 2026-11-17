@@ -20,8 +20,10 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "paths": {
-      "@/*": ["./src/*"]
-    }
+      "@/*": ["./src/*"],
+      "@shared/*": ["../shared/*"]
+    },
+    "resolveJsonModule": true
   },
   "include": ["src"]
 }

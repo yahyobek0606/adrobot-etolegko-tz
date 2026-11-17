@@ -6,7 +6,7 @@ describe('routes', () => {
   it.each([
     ['/', 'Campaigns'],
     ['/campaigns/new', 'New campaign'],
-    ['/campaigns/42', 'Campaign editor'],
+    ['/campaigns/101', 'Test AU campaign'],
   ])('renders %s', async (path, heading) => {
     renderRoute(path)
 

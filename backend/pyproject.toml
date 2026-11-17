@@ -7,6 +7,7 @@ dependencies = [
     "asyncpg>=0.32.0",
     "fastapi>=0.163.1",
     "httpx>=0.28.1",
+    "pycountry>=26.2.16",
     "pydantic>=2.14.3",
     "pydantic-settings>=2.16.3",
     "sqlalchemy[asyncio]>=2.1.9",
@@ -42,6 +43,10 @@ ban-relative-imports = "all"
 python_version = "3.12"
 strict = true
 plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["asyncpg"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

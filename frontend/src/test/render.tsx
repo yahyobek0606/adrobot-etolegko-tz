@@ -1,21 +1,19 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient } from '@tanstack/react-query'
 import { render } from '@testing-library/react'
-import type { ReactElement } from 'react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 
+import { AppProviders } from '@/app/providers'
 import { routes } from '@/app/routes'
 
-export function renderRoute(path: string) {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  const router = createMemoryRouter(routes, { initialEntries: [path] })
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>,
-  )
+export function createTestQueryClient() {
+  return new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: Infinity } } })
 }
 
-export function renderWithQuery(ui: ReactElement) {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>)
+export function renderRoute(path: string) {
+  const router = createMemoryRouter(routes, { initialEntries: [path] })
+  return render(
+    <AppProviders queryClient={createTestQueryClient()}>
+      <RouterProvider router={router} />
+    </AppProviders>,
+  )
 }
