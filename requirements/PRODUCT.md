@@ -59,4 +59,5 @@ Decisions made where the spec was ambiguous. Change them here if they are wrong.
 12. **View in KT** — opens the campaign page in the Keitaro admin in a new tab.
 13. **Importing shares from the provider** — on first open and on fetch, shares are taken from Keitaro as they are. If they are not what the automatic split would produce (e.g. 33/67), those offers are imported as pinned, so the editor always shows Keitaro's real numbers. Unpin to rebalance.
 14. **Push** — re-validated on the server, then the offers flow is updated in Keitaro, then the local state is saved. If Keitaro fails, nothing changes locally.
+    - If the offers in Keitaro no longer match what the editor loaded (someone changed them in Keitaro, or another tab pushed), the push is refused and the user is asked to fetch first. Changes made in Keitaro are never silently overwritten.
 15. **Auth** — none. This is a single-user internal tool.

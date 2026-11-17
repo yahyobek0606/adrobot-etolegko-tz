@@ -1,6 +1,13 @@
 import pytest
 
-from app.domain.campaign_offers import CampaignOffer, RemoteOffer, apply_allocation, reconcile
+from app.domain.campaign_offers import (
+    CampaignOffer,
+    RemoteOffer,
+    active_as_remote,
+    apply_allocation,
+    offers_revision,
+    reconcile,
+)
 from app.domain.errors import InvalidOperationError
 
 
@@ -86,3 +93,20 @@ class TestReconcile:
         result = reconcile(local, [RemoteOffer(1, 100)], {})
 
         assert result == [offer(1, 100), offer(2, 10, archived=True)]
+
+
+class TestOffersRevision:
+    def test_ignores_order(self) -> None:
+        assert offers_revision([RemoteOffer(1, 40), RemoteOffer(2, 60)]) == offers_revision(
+            [RemoteOffer(2, 60), RemoteOffer(1, 40)]
+        )
+
+    def test_changes_with_shares(self) -> None:
+        assert offers_revision([RemoteOffer(1, 100)]) != offers_revision([RemoteOffer(1, 99)])
+
+    def test_local_active_offers_match_their_remote_counterpart(self) -> None:
+        local = [offer(1, 60), offer(2, 40, pinned=True), offer(3, 10, archived=True)]
+
+        assert offers_revision(active_as_remote(local)) == offers_revision(
+            [RemoteOffer(1, 60), RemoteOffer(2, 40)]
+        )

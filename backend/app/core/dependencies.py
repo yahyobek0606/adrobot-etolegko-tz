@@ -4,13 +4,18 @@ from typing import Annotated
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.settings import Settings, get_settings
+from app.core.settings import Settings
 from app.db.session import Database
 from app.db.unit_of_work import UnitOfWork
 from app.providers.base import TrackerProvider
 from app.services.campaign_catalog import CampaignCatalogService, CampaignDefaults
 from app.services.campaign_creation import CampaignCreationService
 from app.services.campaign_offers import CampaignOffersService
+
+
+def get_settings(request: Request) -> Settings:
+    settings: Settings = request.app.state.settings
+    return settings
 
 
 def get_database(request: Request) -> Database:

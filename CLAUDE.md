@@ -68,7 +68,7 @@ Dependency direction: `api -> services -> (domain, repositories, providers)`. `d
 - **App factory** `create_app()` with a `lifespan` that creates and closes the shared `httpx.AsyncClient` and DB engine
 - **Async everywhere**: async routes, `AsyncSession`, `httpx.AsyncClient`
 - **Dependency injection** via FastAPI `Depends` with `Annotated` aliases (`SessionDep`, `ProviderDep`, `CampaignServiceDep`); wiring lives in `core/dependencies.py`
-- **Settings**: one `Settings(BaseSettings)` class, read through a cached `get_settings()`
+- **Settings**: one `Settings(BaseSettings)` class; `create_app(settings)` stores it on `app.state` and routes read it through `SettingsDep`, so tests can pass their own
 - **Unit of Work**: one transaction per use case; services call `uow.commit()`, repositories never commit
 - **Repositories** return domain entities, not ORM rows
 - **Provider abstraction**: `TrackerProvider` is a `typing.Protocol`; `KeitaroProvider` implements it. Services depend only on the protocol
@@ -81,7 +81,7 @@ Dependency direction: `api -> services -> (domain, repositories, providers)`. `d
 ### Keitaro client
 - Endpoint and payload reference: `docs/keitaro-api.md`. Read it before touching `providers/keitaro/`
 - Admin API v1: `{KEITARO_BASE_URL}/admin_api/v1`, auth header `Api-Key: {KEITARO_API_KEY}`
-- The instance is shared with other people: only modify or delete entities this app created
+- The instance is shared with other people. The app only creates campaigns with their streams, archives a campaign it failed to finish creating, and replaces the offers of the stream being edited. Never delete or archive anything else
 - `GET /offers` has no search; offers are cached briefly in the backend and filtered locally
 - Single `httpx.AsyncClient` with `base_url`, auth header and a 10s timeout
 - `tenacity` retries only idempotent GETs, and only on network errors and 5xx
@@ -133,6 +133,7 @@ frontend/src/
 ### Patterns
 - **Typed API**: `pnpm gen:api` runs `openapi-typescript` against the backend `/openapi.json` to produce `lib/api/schema.d.ts`. Request and response types are never written by hand
 - **Server state** lives only in TanStack Query: query key factories per feature, mutations invalidate affected keys
+- **Push conflicts**: the offers state carries a `revision` (hash of the active offers and shares). Push sends it back and the backend answers `409` if Keitaro no longer matches it
 - **Editor draft state** is a `useReducer` inside `campaign-editor/model`, not global state. Actions: `add`, `archive`, `restore`, `togglePin`, `setShare`, `reset`. "Dirty" is derived by comparing the draft with server data
 - **Share calculation** is a pure function, mirrored on the backend. The backend is authoritative and re-validates on push. Both sides are tested against the same fixture cases in `shared/share-cases.json`
 - **Offer live search**: `features/offers/components/OfferCombobox` (shadcn `Command` in `Popover`), `useDebouncedValue` (300ms), `placeholderData: keepPreviousData`; queries only while the popover is open, an empty term lists the first offers. Reuse it, don't rebuild it

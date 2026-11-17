@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { vi } from 'vitest'
 
-import type { CampaignOfferInput, CampaignOffersState } from '@/lib/api/types'
+import type { CampaignOffersState, CampaignOffersUpdate } from '@/lib/api/types'
 import { campaignOffers } from '@/test/fixtures'
 import { renderRoute } from '@/test/render'
 import { server } from '@/test/server'
@@ -36,13 +36,13 @@ describe('CampaignEditorPage', () => {
   })
 
   it('archives, restores and pushes the draft', async () => {
-    let pushed: CampaignOfferInput[] | undefined
+    let pushed: CampaignOffersUpdate | undefined
     server.use(
       http.put('*/api/v1/campaigns/:campaignId/offers', async ({ request }) => {
-        pushed = ((await request.json()) as { offers: CampaignOfferInput[] }).offers
+        pushed = (await request.json()) as CampaignOffersUpdate
         const result: CampaignOffersState = {
           ...campaignOffers,
-          offers: pushed.map((offer, index) => ({
+          offers: pushed.offers.map((offer, index) => ({
             ...offer,
             name: campaignOffers.offers[index]?.name ?? 'x',
           })),
@@ -63,13 +63,37 @@ describe('CampaignEditorPage', () => {
     await user.click(screen.getByRole('button', { name: /Push changes/ }))
 
     await waitFor(() =>
-      expect(pushed).toEqual([
-        { offer_id: 13972, share: 50, is_pinned: true, is_archived: false },
-        { offer_id: 16361, share: 50, is_pinned: false, is_archived: false },
-        { offer_id: 24800, share: 50, is_pinned: false, is_archived: true },
-      ]),
+      expect(pushed).toEqual({
+        offers: [
+          { offer_id: 13972, share: 50, is_pinned: true, is_archived: false },
+          { offer_id: 16361, share: 50, is_pinned: false, is_archived: false },
+          { offer_id: 24800, share: 50, is_pinned: false, is_archived: true },
+        ],
+        revision: campaignOffers.revision,
+      }),
     )
     expect(await screen.findByText('Changes pushed to Keitaro')).toBeInTheDocument()
+  })
+
+  it('offers to fetch when Keitaro changed since the page was loaded', async () => {
+    server.use(
+      http.put('*/api/v1/campaigns/:campaignId/offers', () =>
+        HttpResponse.json(
+          { detail: 'Offers in Keitaro changed after this page was loaded', code: 'conflict' },
+          { status: 409 },
+        ),
+      ),
+    )
+    const user = await openEditor()
+
+    await user.click(screen.getByRole('button', { name: 'Delete 24800 Flexacil [land es]' }))
+    await user.click(
+      screen.getByRole('button', { name: 'Unpin share for 13972 Flexacil [JOINT-PE]' }),
+    )
+    await user.click(screen.getByRole('button', { name: /Push changes/ }))
+    await user.click(await screen.findByRole('button', { name: 'Fetch from KT' }))
+
+    expect(await screen.findByRole('alertdialog')).toHaveTextContent(/Discard changes/)
   })
 
   it('pins a typed share and blocks pushing invalid totals', async () => {
@@ -132,10 +156,10 @@ describe('CampaignEditorPage', () => {
 
   describe('keyboard shortcuts', () => {
     it('pushes with mod+S, including a share still being typed', async () => {
-      let pushed: CampaignOfferInput[] | undefined
+      let pushed: CampaignOffersUpdate | undefined
       server.use(
         http.put('*/api/v1/campaigns/:campaignId/offers', async ({ request }) => {
-          pushed = ((await request.json()) as { offers: CampaignOfferInput[] }).offers
+          pushed = (await request.json()) as CampaignOffersUpdate
           return HttpResponse.json(campaignOffers)
         }),
       )
@@ -147,7 +171,7 @@ describe('CampaignEditorPage', () => {
       await user.keyboard('{Control>}s{/Control}')
 
       await waitFor(() =>
-        expect(pushed?.map((offer) => [offer.offer_id, offer.share])).toEqual([
+        expect(pushed?.offers.map((offer) => [offer.offer_id, offer.share])).toEqual([
           [13972, 40],
           [24800, 60],
           [16361, 20],

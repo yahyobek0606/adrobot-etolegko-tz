@@ -8,10 +8,12 @@ from app.db.unit_of_work import UnitOfWork
 from app.domain.campaign_offers import (
     CampaignOffer,
     RemoteOffer,
+    active_as_remote,
     apply_allocation,
+    offers_revision,
     reconcile,
 )
-from app.domain.errors import InvalidOperationError, NotFoundError
+from app.domain.errors import ConflictError, InvalidOperationError, NotFoundError
 from app.providers.base import Stream, StreamKind, StreamOffer, TrackerProvider
 from app.services.campaign_catalog import CampaignSummary
 
@@ -31,6 +33,10 @@ class CampaignOffersState:
     campaign: CampaignSummary
     stream: Stream | None
     offers: list[CampaignOffer]
+
+    @property
+    def revision(self) -> str:
+        return offers_revision(active_as_remote(self.offers))
 
 
 class CampaignOffersService:
@@ -54,10 +60,17 @@ class CampaignOffersService:
         logger.info("campaign_offers_synced", campaign_id=campaign_id, offers=len(offers))
         return CampaignOffersState(campaign=campaign, stream=stream, offers=offers)
 
-    async def push(self, campaign_id: int, drafts: Sequence[OfferDraft]) -> CampaignOffersState:
+    async def push(
+        self, campaign_id: int, drafts: Sequence[OfferDraft], revision: str
+    ) -> CampaignOffersState:
         campaign, stream = await self._load_remote(campaign_id)
         if stream is None:
             raise InvalidOperationError("This campaign has no offers flow to update")
+        if offers_revision(_remote_offers(stream)) != revision:
+            raise ConflictError(
+                "Offers in Keitaro changed after this page was loaded. "
+                "Fetch streams from KT, then push again"
+            )
 
         local = await self._uow.campaign_offers.list_for_campaign(campaign_id)
         names = await self._resolve_names(drafts, {offer.offer_id: offer.name for offer in local})
@@ -97,7 +110,7 @@ class CampaignOffersService:
     async def _store_reconciled(
         self, campaign_id: int, local: Sequence[CampaignOffer], stream: Stream
     ) -> list[CampaignOffer]:
-        remote = [RemoteOffer(o.offer_id, o.share) for o in stream.offers]
+        remote = _remote_offers(stream)
         catalog = await self._provider.get_offers([o.offer_id for o in remote])
         offers = reconcile(local, remote, {offer.id: offer.name for offer in catalog})
         await self._uow.campaign_offers.replace_for_campaign(campaign_id, offers)
@@ -115,3 +128,7 @@ class CampaignOffersService:
         if missing:
             raise NotFoundError(f"Offers not found: {', '.join(map(str, missing))}")
         return {**known, **found}
+
+
+def _remote_offers(stream: Stream) -> list[RemoteOffer]:
+    return [RemoteOffer(o.offer_id, o.share) for o in stream.offers]

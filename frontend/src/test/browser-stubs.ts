@@ -24,3 +24,4 @@ window.ResizeObserver ??= ResizeObserverStub
 Element.prototype.scrollIntoView ??= noop
 Element.prototype.hasPointerCapture ??= () => false
 Element.prototype.releasePointerCapture ??= noop
+Element.prototype.setPointerCapture ??= noop

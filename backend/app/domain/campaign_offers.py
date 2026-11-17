@@ -1,4 +1,5 @@
-from collections.abc import Mapping, Sequence
+import hashlib
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, replace
 
 from app.domain.errors import InvalidOperationError
@@ -24,6 +25,17 @@ class CampaignOffer:
 class RemoteOffer:
     offer_id: int
     share: int
+
+
+def offers_revision(offers: Iterable[RemoteOffer]) -> str:
+    canonical = ",".join(
+        f"{o.offer_id}:{o.share}" for o in sorted(offers, key=lambda o: o.offer_id)
+    )
+    return hashlib.sha256(canonical.encode()).hexdigest()[:16]
+
+
+def active_as_remote(offers: Iterable[CampaignOffer]) -> list[RemoteOffer]:
+    return [RemoteOffer(o.offer_id, o.share) for o in offers if not o.is_archived]
 
 
 def apply_allocation(offers: Sequence[CampaignOffer]) -> list[CampaignOffer]:

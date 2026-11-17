@@ -114,6 +114,7 @@ class CampaignOffersResponse(ApiModel):
     campaign: CampaignResponse
     stream: StreamResponse | None
     offers: list[CampaignOfferResponse]
+    revision: str
 
     @classmethod
     def from_state(cls, state: CampaignOffersState) -> "CampaignOffersResponse":
@@ -123,6 +124,7 @@ class CampaignOffersResponse(ApiModel):
             if state.stream
             else None,
             offers=[CampaignOfferResponse.model_validate(offer) for offer in state.offers],
+            revision=state.revision,
         )
 
 
@@ -135,3 +137,4 @@ class CampaignOfferInput(BaseModel):
 
 class CampaignOffersUpdateRequest(BaseModel):
     offers: Annotated[list[CampaignOfferInput], Field(max_length=200)]
+    revision: Annotated[str, StringConstraints(min_length=1, max_length=64)]

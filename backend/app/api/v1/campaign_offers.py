@@ -34,4 +34,6 @@ async def update_campaign_offers(
         )
         for offer in payload.offers
     ]
-    return CampaignOffersResponse.from_state(await service.push(campaign_id, drafts))
+    return CampaignOffersResponse.from_state(
+        await service.push(campaign_id, drafts, payload.revision)
+    )

@@ -33,7 +33,7 @@ import {
 } from '@/features/campaign-editor/model/draft'
 import { shareErrorMessages } from '@/features/campaign-editor/model/messages'
 import { modKeyLabel, useHotkey } from '@/hooks/useHotkey'
-import { errorMessage } from '@/lib/api/errors'
+import { errorMessage, isConflict } from '@/lib/api/errors'
 import type { CampaignOffersState } from '@/lib/api/types'
 import { cn } from '@/lib/utils'
 
@@ -53,11 +53,19 @@ export function CampaignOffersEditor({ state }: CampaignOffersEditorProps) {
 
   const reset = () => dispatch({ type: 'reset', offers: fromServer(state.offers) })
   const pushChanges = () =>
-    push.mutate(toRequest(view), {
-      onSuccess: () => toast.success('Changes pushed to Keitaro'),
-      onError: (error) =>
-        toast.error('Changes were not pushed', { description: errorMessage(error) }),
-    })
+    push.mutate(
+      { offers: toRequest(view), revision: state.revision },
+      {
+        onSuccess: () => toast.success('Changes pushed to Keitaro'),
+        onError: (error) =>
+          toast.error('Changes were not pushed', {
+            description: errorMessage(error),
+            action: isConflict(error)
+              ? { label: 'Fetch from KT', onClick: () => setConfirmSync(true) }
+              : undefined,
+          }),
+      },
+    )
 
   const fetchFromKeitaro = () => {
     setConfirmSync(false)

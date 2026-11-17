@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { api } from '@/lib/api/client'
 import { unwrap } from '@/lib/api/errors'
-import type { CampaignOfferInput, CampaignOffersState } from '@/lib/api/types'
+import type { CampaignOffersState, CampaignOffersUpdate } from '@/lib/api/types'
 
 export const campaignOfferKeys = {
   all: ['campaign-offers'] as const,
@@ -38,12 +38,9 @@ export function useSyncCampaignOffers(campaignId: number) {
 export function usePushCampaignOffers(campaignId: number) {
   const store = useStoreState(campaignId)
   return useMutation({
-    mutationFn: (offers: CampaignOfferInput[]) =>
+    mutationFn: (body: CampaignOffersUpdate) =>
       unwrap(
-        api.PUT('/api/v1/campaigns/{campaign_id}/offers', {
-          ...forCampaign(campaignId),
-          body: { offers },
-        }),
+        api.PUT('/api/v1/campaigns/{campaign_id}/offers', { ...forCampaign(campaignId), body }),
       ),
     onSuccess: store,
   })

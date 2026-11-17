@@ -57,4 +57,5 @@ export const campaignOffers: CampaignOffersState = {
     },
     { offer_id: 16361, name: '16361 Old offer', share: 20, is_pinned: false, is_archived: true },
   ],
+  revision: 'rev-1',
 }

@@ -27,6 +27,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         await database.dispose()
 
     app = FastAPI(title=settings.app_name, lifespan=lifespan)
+    app.state.settings = settings
     app.add_middleware(RequestContextMiddleware)
     app.add_middleware(
         CORSMiddleware,

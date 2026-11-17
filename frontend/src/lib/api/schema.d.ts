@@ -178,11 +178,15 @@ export interface components {
             stream: components["schemas"]["StreamResponse"] | null;
             /** Offers */
             offers: components["schemas"]["CampaignOfferResponse"][];
+            /** Revision */
+            revision: string;
         };
         /** CampaignOffersUpdateRequest */
         CampaignOffersUpdateRequest: {
             /** Offers */
             offers: components["schemas"]["CampaignOfferInput"][];
+            /** Revision */
+            revision: string;
         };
         /** CampaignResponse */
         CampaignResponse: {

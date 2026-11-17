@@ -44,3 +44,7 @@ export async function unwrap<T>(
 export function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Something went wrong'
 }
+
+export function isConflict(error: unknown): boolean {
+  return error instanceof ApiError && error.status === 409
+}

@@ -143,7 +143,7 @@ Real example of the result (`GET /campaigns/212636/streams`, another user's camp
 - **Geo filter** payload uses ISO alpha-2 codes (`"AU"`), even though the UI shows country names
 - **Group id** is sent as a string in campaign bodies but returned as an integer
 
-## To verify during implementation
-- That `PUT /streams/{id}` with `offers` replaces the whole list rather than merging into it
-- Whether `offers[].share` must sum to exactly 100, or whether Keitaro normalizes it
-- The error response format for `4xx` and `5xx`
+## Behaviour we rely on
+- `PUT /streams/{id}` with `offers` replaces the whole list: an offer left out is removed from the stream. Deleting from the editor depends on this and was checked manually
+- We always send shares that sum to exactly 100, so whether Keitaro would normalize other totals does not matter to us
+- Error bodies are not consistent (`404` is plain text), so the client never parses them: it maps the status code to a `ProviderError` or `NotFoundError` and logs the first 500 characters of the body
